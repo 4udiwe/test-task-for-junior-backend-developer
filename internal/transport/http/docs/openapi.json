@@ -14,12 +14,18 @@
     {
       "name": "Tasks",
       "description": "Operations with tasks"
+    },
+    {
+      "name": "Recurrence Rules",
+      "description": "Operations with recurrence rules for periodic tasks"
     }
   ],
   "paths": {
     "/api/v1/tasks": {
       "get": {
-        "tags": ["Tasks"],
+        "tags": [
+          "Tasks"
+        ],
         "summary": "List tasks",
         "responses": {
           "200": {
@@ -28,7 +34,9 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/Task" }
+                  "items": {
+                    "$ref": "#/components/schemas/Task"
+                  }
                 }
               }
             }
@@ -36,13 +44,17 @@
         }
       },
       "post": {
-        "tags": ["Tasks"],
+        "tags": [
+          "Tasks"
+        ],
         "summary": "Create task",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/CreateTaskRequest" }
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskRequest"
+              }
             }
           }
         },
@@ -51,24 +63,34 @@
             "description": "Created task",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Task" }
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
               }
             }
           },
-          "400": { "$ref": "#/components/responses/BadRequest" }
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
         }
       }
     },
     "/api/v1/tasks/{id}": {
       "get": {
-        "tags": ["Tasks"],
+        "tags": [
+          "Tasks"
+        ],
         "summary": "Get task by ID",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer", "format": "int64", "minimum": 1 }
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
           }
         ],
         "responses": {
@@ -76,29 +98,41 @@
             "description": "Task",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Task" }
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
               }
             }
           },
-          "404": { "$ref": "#/components/responses/NotFound" }
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
         }
       },
       "put": {
-        "tags": ["Tasks"],
+        "tags": [
+          "Tasks"
+        ],
         "summary": "Update task",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer", "format": "int64", "minimum": 1 }
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/UpdateTaskRequest" }
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTaskRequest"
+              }
             }
           }
         },
@@ -107,28 +141,253 @@
             "description": "Updated task",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Task" }
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
               }
             }
           },
-          "400": { "$ref": "#/components/responses/BadRequest" },
-          "404": { "$ref": "#/components/responses/NotFound" }
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
         }
       },
       "delete": {
-        "tags": ["Tasks"],
+        "tags": [
+          "Tasks"
+        ],
         "summary": "Delete task",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer", "format": "int64", "minimum": 1 }
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
           }
         ],
         "responses": {
-          "204": { "description": "Deleted" },
-          "404": { "$ref": "#/components/responses/NotFound" }
+          "204": {
+            "description": "Deleted"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/v1/tasks/with-recurrence": {
+      "post": {
+        "tags": [
+          "Recurrence Rules"
+        ],
+        "summary": "Create task with recurrence",
+        "description": "Creates a task that will be automatically generated based on recurrence rules. You can either use an existing recurrence_rule_id or provide recurrence_rule_data to create a new rule.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskWithRecurrenceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created task with recurrence",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/v1/recurrence-rules": {
+      "get": {
+        "tags": [
+          "Recurrence Rules"
+        ],
+        "summary": "List recurrence rules",
+        "parameters": [
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "description": "Filter by enabled status (true/false)",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of recurrence rules",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecurrenceRule"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Recurrence Rules"
+        ],
+        "summary": "Create recurrence rule",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRecurrenceRuleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created recurrence rule",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecurrenceRule"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/api/v1/recurrence-rules/{id}": {
+      "get": {
+        "tags": [
+          "Recurrence Rules"
+        ],
+        "summary": "Get recurrence rule by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recurrence rule",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecurrenceRule"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Recurrence Rules"
+        ],
+        "summary": "Update recurrence rule",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRecurrenceRuleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated recurrence rule",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecurrenceRule"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Recurrence Rules"
+        ],
+        "summary": "Delete recurrence rule",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
         }
       }
     }
@@ -139,7 +398,9 @@
         "description": "Bad request",
         "content": {
           "application/json": {
-            "schema": { "$ref": "#/components/schemas/Error" }
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
           }
         }
       },
@@ -147,7 +408,9 @@
         "description": "Resource not found",
         "content": {
           "application/json": {
-            "schema": { "$ref": "#/components/schemas/Error" }
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
           }
         }
       }
@@ -155,7 +418,9 @@
     "schemas": {
       "CreateTaskRequest": {
         "type": "object",
-        "required": ["title"],
+        "required": [
+          "title"
+        ],
         "properties": {
           "title": {
             "type": "string",
@@ -167,14 +432,21 @@
           },
           "status": {
             "type": "string",
-            "enum": ["new", "in_progress", "done"],
+            "enum": [
+              "new",
+              "in_progress",
+              "done"
+            ],
             "example": "new"
           }
         }
       },
       "UpdateTaskRequest": {
         "type": "object",
-        "required": ["title", "status"],
+        "required": [
+          "title",
+          "status"
+        ],
         "properties": {
           "title": {
             "type": "string",
@@ -186,7 +458,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["new", "in_progress", "done"],
+            "enum": [
+              "new",
+              "in_progress",
+              "done"
+            ],
             "example": "in_progress"
           }
         }
@@ -194,15 +470,26 @@
       "Task": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer", "format": "int64", "example": 1 },
-          "title": { "type": "string", "example": "Prepare release" },
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "example": "Prepare release"
+          },
           "description": {
             "type": "string",
             "example": "Collect release notes and check migrations"
           },
           "status": {
             "type": "string",
-            "enum": ["new", "in_progress", "done"],
+            "enum": [
+              "new",
+              "in_progress",
+              "done"
+            ],
             "example": "new"
           },
           "created_at": {
@@ -214,13 +501,183 @@
             "type": "string",
             "format": "date-time",
             "example": "2026-03-24T00:00:00Z"
+          },
+          "recurrence_rule_id": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true,
+            "example": null,
+            "description": "ID of the recurrence rule if this is a periodic task"
+          },
+          "parent_task_id": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true,
+            "example": null,
+            "description": "ID of the parent task in a chain of recurring instances"
           }
         }
       },
       "Error": {
         "type": "object",
         "properties": {
-          "error": { "type": "string", "example": "task not found" }
+          "error": {
+            "type": "string",
+            "example": "task not found"
+          }
+        }
+      },
+      "RecurrenceParams": {
+        "type": "object",
+        "description": "Parameters for recurrence rule (structure depends on recurrence_type)",
+        "properties": {
+          "interval_days": {
+            "type": "integer",
+            "example": 1,
+            "description": "For daily recurrence: interval in days"
+          },
+          "month_days": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "example": [
+              1,
+              15,
+              30
+            ],
+            "description": "For monthly recurrence: days of month (1-30)"
+          },
+          "specific_dates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "2026-05-01",
+              "2026-06-15"
+            ],
+            "description": "For specific recurrence: ISO 8601 dates"
+          },
+          "start_date": {
+            "type": "string",
+            "example": "2026-04-14",
+            "description": "Start date (ISO 8601)"
+          },
+          "end_date": {
+            "type": "string",
+            "nullable": true,
+            "example": null,
+            "description": "End date (ISO 8601), null = infinite"
+          }
+        }
+      },
+      "CreateRecurrenceRuleRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "recurrence_type",
+          "params"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Daily patient rounds",
+            "description": "Human-readable name for the rule"
+          },
+          "recurrence_type": {
+            "type": "string",
+            "enum": [
+              "daily",
+              "monthly",
+              "specific",
+              "even",
+              "odd"
+            ],
+            "example": "daily",
+            "description": "Type of recurrence"
+          },
+          "params": {
+            "$ref": "#/components/schemas/RecurrenceParams"
+          }
+        }
+      },
+      "RecurrenceRule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "Daily patient rounds"
+          },
+          "recurrence_type": {
+            "type": "string",
+            "enum": [
+              "daily",
+              "monthly",
+              "specific",
+              "even",
+              "odd"
+            ],
+            "example": "daily"
+          },
+          "params": {
+            "$ref": "#/components/schemas/RecurrenceParams"
+          },
+          "next_occurrence_date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-15T00:00:00Z",
+            "description": "Next date when a task instance will be created"
+          },
+          "is_enabled": {
+            "type": "boolean",
+            "example": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-14T10:30:00Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-14T10:30:00Z"
+          }
+        }
+      },
+      "CreateTaskWithRecurrenceRequest": {
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Daily patient rounds",
+            "description": "Task title"
+          },
+          "description": {
+            "type": "string",
+            "example": "Check all patients in the ward",
+            "description": "Task description (optional)"
+          },
+          "recurrence_rule_id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 1,
+            "nullable": true,
+            "description": "Use existing recurrence rule ID (either this or recurrence_rule_data)"
+          },
+          "recurrence_rule_data": {
+            "$ref": "#/components/schemas/CreateRecurrenceRuleRequest",
+            "nullable": true,
+            "description": "Create new recurrence rule inline (either this or recurrence_rule_id)"
+          }
         }
       }
     }

@@ -12,6 +12,7 @@ import (
 
 	infrastructurepostgres "example.com/taskservice/internal/infrastructure/postgres"
 	postgresrepo "example.com/taskservice/internal/repository/postgres"
+	taskscheduler "example.com/taskservice/internal/scheduler"
 	transporthttp "example.com/taskservice/internal/transport/http"
 	swaggerdocs "example.com/taskservice/internal/transport/http/docs"
 	httphandlers "example.com/taskservice/internal/transport/http/handlers"
@@ -35,11 +36,34 @@ func main() {
 	}
 	defer pool.Close()
 
+	// Repositories
 	taskRepo := postgresrepo.New(pool)
-	taskUsecase := task.NewService(taskRepo)
+	recurrenceRuleRepo := postgresrepo.NewRecurrenceRuleRepository(pool)
+	jobRepo := postgresrepo.NewJobRepository(pool)
+
+	// Usecase with recurrence support
+	taskUsecase := task.NewServiceWithRecurrence(taskRepo, recurrenceRuleRepo, jobRepo)
+
+	// HTTP Handlers
 	taskHandler := httphandlers.NewTaskHandler(taskUsecase)
+	recurrenceHandler := httphandlers.NewRecurrenceHandler(logger, taskUsecase)
 	docsHandler := swaggerdocs.NewHandler()
-	router := transporthttp.NewRouter(taskHandler, docsHandler)
+
+	// Router with recurrence support
+	router := transporthttp.NewRouterWithRecurrence(taskHandler, recurrenceHandler, docsHandler)
+
+	// Scheduler for recurring tasks
+	scheduler := taskscheduler.NewScheduler(
+		logger,
+		jobRepo,
+		recurrenceRuleRepo,
+		taskRepo,
+		1*time.Hour,  // Poll interval
+		5*time.Minute, // Lock duration
+	)
+
+	// Start scheduler
+	scheduler.Start(ctx)
 
 	server := &http.Server{
 		Addr:              cfg.HTTPAddr,
@@ -52,6 +76,9 @@ func main() {
 
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
+
+		// Graceful scheduler shutdown
+		scheduler.Stop()
 
 		if err := server.Shutdown(shutdownCtx); err != nil {
 			logger.Error("shutdown http server", "error", err)
